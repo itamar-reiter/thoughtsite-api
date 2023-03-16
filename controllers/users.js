@@ -33,6 +33,57 @@ const login = (req, res, next) => {
     });
 };
 
+const getUsers = (req, res, next) => {
+  console.log('in get users controller');
+  const { name } = req.params;
+  const regex = new RegExp(name, 'i');
+  Users.find({ name: { $regex: regex } })
+    .then((users) => {
+      if (!users) {
+        throw new ServerError();
+      }
+      res.status(200).send(users);
+    })
+    .catch(next);
+};
+
+const addUserToFollowers = (req, res, next) => {
+  const userId = req.user._id;
+  const friendId = req.params._id;
+  console.log(userId);
+  console.log(friendId);
+  Users.findOneAndUpdate({ _id: friendId }, { $addToSet: { followers: userId } })
+    .then((user) => {
+      console.log(user);
+      res.status(200).send(user);
+    })
+    .catch(next);
+};
+
+const addFriend = (req, res, next) => {
+  const userId = req.user._id;
+  const { friendsIds } = req.body;
+  Users.findOneAndUpdate({ _id: userId }, {
+    $addToSet: { friends: friendsIds },
+  })
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch(next);
+};
+
+const deleteFriend = (req, res, next) => {
+  const userId = req.user._id;
+  const { friendId } = req.body;
+  Users.findOneAndUpdate({ _id: userId }, {
+    $pull: { friends: friendId },
+  })
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch(next);
+};
+
 const getUserData = (req, res, next) => {
   const id = req.user._id;
   return Users.findOne({ _id: id })
@@ -64,4 +115,6 @@ const createUser = (req, res, next) => {
     });
 };
 
-module.exports = { login, getUserData, createUser };
+module.exports = {
+  login, getUsers, getUserData, createUser, addUserToFollowers, addFriend, deleteFriend,
+};

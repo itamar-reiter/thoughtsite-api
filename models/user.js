@@ -26,6 +26,14 @@ const userSchema = new Schema({
     required: true,
     select: false,
   },
+  followers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+  }],
+  friends: [{
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+  }],
 });
 
 userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
