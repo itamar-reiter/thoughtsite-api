@@ -1,9 +1,9 @@
 const Posts = require('../models/post');
-const user = require('../models/user');
 
 const getPosts = (req, res, next) => {
   Posts.find({})
     .then((posts) => {
+      posts.sort((a, b) => b.comments.length - a.comments.length);
       res.status(200).send(posts);
     })
     .catch(next);
