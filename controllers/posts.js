@@ -8,16 +8,16 @@ const getPosts = (req, res, next) => {
   const userId = req.user._id;
   Posts.find({})
     .then((posts) => {
-      posts.sort((a, b) => b.comments.length - a.comments.length);
-      // # if the user liked the post, add the isLiked field to the post and set it to true
-      posts.forEach((post) => {
-        if (post.likes.includes(userId)) {
-          post.isLiked = true;
+      const sortedPosts = posts.sort((a, b) => b.comments.length - a.comments.length);
+      const postsWithIsLiked = sortedPosts.map((post) => {
+        if (post._doc.likes.includes(userId)) {
+          post._doc.isLiked = true;
         } else {
-          post.isLiked = false;
+          post._doc.isLiked = false;
         }
+        return post;
       });
-      return posts;
+      return postsWithIsLiked;
     })
     .then((posts) => {
       res.status(200).send(posts);
@@ -56,8 +56,10 @@ const addComment = (req, res, next) => {
 // method for toggeling post's like
 
 const togglePostLike = (req, res, next, isLiked) => {
+  console.log('in toggle like');
   const userId = req.user._id;
-  const { postId } = req.params;
+  const postId = req.params._id;
+  console.log(postId);
   const method = isLiked ? { $addToSet: { likes: userId } } : { $pull: { likes: userId } };
   Posts.findOneAndUpdate(
     { _id: postId },
@@ -66,7 +68,7 @@ const togglePostLike = (req, res, next, isLiked) => {
   )
     .orFail()
     .then((post) => {
-      post.isLiked = isLiked;
+      post._doc.isLiked = isLiked;
       res.status(200).send(post);
     })
     .catch((error) => {
@@ -82,11 +84,11 @@ const togglePostLike = (req, res, next, isLiked) => {
 };
 
 // add like to a post, using the togglePostLike function
-const putLikeToPost = (req, res, next) => togglePostLike(req, res, next, true);
+const putLike = (req, res, next) => togglePostLike(req, res, next, true);
 
 // remove like from a post, using the togglePostLike function
-const removeLikeFromPost = (req, res, next) => togglePostLike(req, res, next, false);
+const deleteLike = (req, res, next) => togglePostLike(req, res, next, false);
 
 module.exports = {
-  createPost, getPosts, addComment, putLikeToPost, removeLikeFromPost,
+  createPost, getPosts, addComment, putLike, deleteLike,
 };

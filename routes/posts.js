@@ -1,12 +1,12 @@
 const postsRouter = require('express').Router();
 const {
-  createPost, getPosts, addComment, putLikeToPost, removeLikeFromPost,
+  createPost, getPosts, addComment, putLike, deleteLike,
 } = require('../controllers/posts');
 
 postsRouter.post('/posts', createPost);
 postsRouter.get('/posts', getPosts);
 postsRouter.put('/posts/:_id/comments', addComment);
-postsRouter.put('/posts/:_id/likes', putLikeToPost);
-postsRouter.delete('/posts/:_id/likes', removeLikeFromPost);
+postsRouter.put('/posts/:_id/likes', putLike);
+postsRouter.delete('/posts/:_id/likes', deleteLike);
 
 module.exports = postsRouter;
